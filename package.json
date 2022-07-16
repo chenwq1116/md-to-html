@@ -1,0 +1,24 @@
+{
+  "name": "md-to-html",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "node build/test.mjs",
+    "build": "node build/build.mjs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/chenwq1116/md-to-html.git"
+  },
+  "author": "chenwq",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/chenwq1116/md-to-html/issues"
+  },
+  "homepage": "https://github.com/chenwq1116/md-to-html#readme",
+  "dependencies": {
+    "fs-extra": "^10.1.0",
+    "markdown-to-html-cli": "^3.4.14"
+  }
+}
