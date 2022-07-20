@@ -2,7 +2,9 @@
  
 ## doc
 MarkDown file source dir 
+
 if have `img` files should be crate `public` path. move `img` files to `public` 
+
 copy your md project to `doc`. when build project will read this path
 
 ## dir.json
@@ -15,3 +17,14 @@ npm run build
 ```
 outputpath `.deploy`
 
+## start 
+```shell
+cd .deploy
+start nginx
+```
+
+## stop
+```shell
+cd .deploy
+.\nginx.exe -s stop
+```
