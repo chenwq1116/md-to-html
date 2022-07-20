@@ -1,9 +1,9 @@
-export function regxMdHref(mdStr){
+export function regxMdHref(mdStr,hrefHost){
     let returnArr = [];
     const regexp = /\[\S*\]\(\S*\)/g;
-    const mdArray = regxMdHrefFun(mdStr,regexp);
+    const mdArray = regReturnArr(mdStr,regexp);
     mdArray.forEach(element => {
-        let newSubStr = element.replace('(','(./');
+        let newSubStr = element.replace('(','(' + hrefHost );
         newSubStr = newSubStr.replace(')','.html)');
         const mdHrefJson = {
             subStr: element,
@@ -14,7 +14,25 @@ export function regxMdHref(mdStr){
     return returnArr;
 }
 
-export function regxMdHrefFun(mdStr,regexp){
+export function regxImg(mdStr,hrefHost){
+    let returnArr = [];
+    const regexp = /\!\[\[.*\]\]/g;
+    const mdArray = regReturnArr(mdStr,regexp);
+    mdArray.forEach(element => {
+        let newSubStr = element.replace('![[','![](' + hrefHost );
+        newSubStr = newSubStr.replaceAll(' ','%20');
+        newSubStr = newSubStr.replace(']]',')');
+        const mdHrefJson = {
+            subStr: element,
+            newSubStr: newSubStr
+        }
+        returnArr.push(mdHrefJson);
+    });
+    return returnArr;
+}
+
+
+function regReturnArr(mdStr,regexp){
     let returnArr = [];
     const mdArray = [...mdStr.matchAll(regexp)];
     mdArray.forEach(element => {

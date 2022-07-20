@@ -1,0 +1,12 @@
+{
+    "indexFile":"model.md",
+    "deployDir": ".deploy",
+    "deployHtmlDir": "html",
+    "deployHtmlPublicDir": "public",
+    "docDir": "doc",
+    "docPublicDir": "public",
+    "nginxDir": "nginx",
+    "nginxWinDir": "win",
+    "hrefHost": "http://localhost/",
+    "imgHost": ""
+}

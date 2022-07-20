@@ -1,16 +1,45 @@
 import FS from 'fs-extra';
 import path from 'path';
 import { create } from 'markdown-to-html-cli';
-import { regxMdHref } from './utils.mjs';
+import { regxMdHref, regxImg } from './utils.mjs';
 
-const deployPath = path.resolve(process.cwd(), '.deploy');
-const docPath = path.resolve(process.cwd(), 'doc');
+const dirJson = FS.readFileSync(path.resolve(process.cwd(), 'build/dir.json'));
+const dir = JSON.parse(dirJson);
+console.log(dir);
+const deployDir = path.resolve(process.cwd(), dir.deployDir);
+const deployHtmlDir = path.resolve(deployDir, dir.deployHtmlDir);
+const deployHtmlPublicDir = path.resolve(deployHtmlDir, dir.deployHtmlPublicDir);
+
+const docDir = path.resolve(process.cwd(), dir.docDir);
+const docPublicDir = path.resolve(docDir, dir.docPublicDir);
+const nginxDir = path.resolve(process.cwd(), dir.nginxDir);
+const nginxWinDir = path.resolve(nginxDir, dir.nginxWinDir);
+
+const hrefHost = dir.hrefHost;
 
 let pathAll = [];
-readMarkdownPaths(docPath);
-// console.log(pathAll);
 
+initDir();
+copyPublicFile();
+readMarkdownPaths(docDir);
 createMdToHtml(pathAll);
+
+function initDir() {
+    try {
+        FS.ensureDirSync(deployDir);
+        FS.emptyDirSync(deployDir);
+        FS.ensureDirSync(docDir);
+        FS.ensureDirSync(nginxDir);
+        FS.ensureDirSync(nginxWinDir);
+        FS.copySync(nginxWinDir, deployDir);
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+function copyPublicFile() {
+    FS.copySync(docPublicDir, deployHtmlPublicDir);
+}
 
 /**
  * return all `*.md` file path
@@ -28,7 +57,7 @@ function readMarkdownPaths(filepath) {
             }
         }
     } catch (err) {
-        console.log(err.errno);
+        console.log(filepath + ':' + err.errno);
     }
 }
 
@@ -38,27 +67,32 @@ function readMarkdownPaths(filepath) {
  */
 function createMdToHtml(pathArr) {
     pathArr.forEach((mdPath, i) => {
-        let htmlPath = mdPath.replace('doc','.deploy');
-        htmlPath = htmlPath.replace('.md','.html');
-        console.log(htmlPath);
+        let htmlPath = mdPath.replace(docDir, deployHtmlDir);
+        htmlPath = replaceIndexHtml(htmlPath);
+        htmlPath = htmlPath.replace('.md', '.html');
         const con = FS.readFileSync(mdPath);
         let str = con.toString();
         str = replaceMdHref(str);
         const html = create({
-          markdown: str,
+            markdown: str,
         });
         FS.outputFileSync(htmlPath, html);
     });
 }
 
-
-//\[[\u4e00-\u9fa5]*\]\([\u4e00-\u9fa5]*\/[\u4e00-\u9fa5]*\)
-//\[\S*\]\(\S*\)
-
-function replaceMdHref(str){
-    const hrefArr = regxMdHref(str);
-    hrefArr.forEach(element => {
-        str = str.replace(element.subStr,element.newSubStr)
+function replaceMdHref(str) {
+    const hrefArr = regxMdHref(str, hrefHost);
+    const imgArr = regxImg(str, hrefHost);
+    const allArr = hrefArr.concat(imgArr);
+    allArr.forEach(element => {
+        str = str.replace(element.subStr, element.newSubStr)
     });
     return str;
+}
+
+function replaceIndexHtml(htmlPath){
+    if(htmlPath.includes(dir.indexFile)){
+        htmlPath = htmlPath.replace(dir.indexFile, 'index.md');
+    }
+    return htmlPath;
 }
